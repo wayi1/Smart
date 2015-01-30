@@ -5,7 +5,6 @@
 
 #define NUM_THREADS 2 // The # of threads for analytics task.
 #define STEP  1 // The size of unit chunk for each single read, which groups a bunch of elements for mapping and reducing. (E.g., for a relational table, STEP should equal the # of columns.) 
-#define BUF_SIZE 128	// The size of shared data buffer for each analytics iteration. 
 #define NUM_ELEMS 1024 // The total number of elements of the simulated data.
 
 #define PRINT_COMBINATION_MAP 1
