@@ -54,6 +54,8 @@ struct RedObj {
   virtual bool trigger() const {
     return false;
   }
+
+  virtual ~RedObj() {}
 };
 
 // Scheduler arguments.
@@ -208,6 +210,8 @@ class Scheduler {
   // To output a reduction object as an output element value, certain
   // lightweigth conversion can be involved.
   virtual void output();
+
+  virtual ~Scheduler() {}
 
  protected:
   // Calculate the start location for each data split.
