@@ -6,7 +6,6 @@
 #define NUM_THREADS 4 // The # of threads for analytics task.
 // For logistic regression application, STEP and NUM_COLS in logistic_regression.h must be equal.
 #define STEP  NUM_COLS // The size of unit chunk for each single read, which groups a bunch of elements for mapping and reducing. (E.g., for a relational table, STEP should equal the # of columns.) 
-#
 #define NUM_ELEMS 1024 // The total number of elements of the simulated data.
 #define NUM_ITERS 2 // The # of iterations.
 
