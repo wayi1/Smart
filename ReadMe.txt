@@ -1,7 +1,7 @@
 Compile and Run:
 1. To compile the file, C++11 should be supported. The versin of gcc compiler should be at least 4.8. 
 
-2. Before running any application, the uer should check if the OpenMP version is newer than 3.1.
+2. Before running any application, the user should check if the OpenMP version is newer than 3.1.
 Setting CPU affinity can easily gain a 10X speedup.
 This can be achieved simply by setting an environment variable in the
 bashrc/bash_profile file:
