@@ -375,13 +375,13 @@ void Scheduler<In, Out>::run(const In* data, size_t total_len, size_t buf_size, 
       dprintf("Global combination map after post-combination at iteration %d...\n", iter);
       //dump_combination_map();
     }
+  }
 
-    // Ouptut (local) combination_map_ to each node's output destination.
-    // If the output destination is only valid for the master node,
-    // then only the (global) combination_map_ on the master node will be output.
-    if (out != nullptr && out_len > 0) {
-      output();
-    }
+  // Ouptut (local) combination_map_ to each node's output destination.
+  // If the output destination is only valid for the master node,
+  // then only the (global) combination_map_ on the master node will be output.
+  if (out != nullptr && out_len > 0) {
+    output();
   }
 
   //clk_end = chrono::system_clock::now();
