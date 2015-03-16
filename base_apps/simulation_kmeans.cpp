@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
   }
   for (int i = 0; i < NUM_MEANS; ++i) {
     for (int j = 0; j < NUM_DIMS; ++j) {
-      means[i][j] = i * 10;  // Thi setting can result in some empty clusters.
+      means[i][j] = i * 10;  // This setting can result in some empty clusters.
     }
   }
 
