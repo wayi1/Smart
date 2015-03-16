@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
 
   const size_t total_len = NUM_ELEMS;
   double* in = new double[total_len];
-  // The output is an 2D array that indicates k centroids in a multi-dimensional
+  // The output is a 2D array that indicates k vectors in a multi-dimensional
   // space.
   const size_t out_len = NUM_MEANS;
   double** out = new double*[out_len];
