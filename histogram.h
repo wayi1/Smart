@@ -45,7 +45,7 @@ public:
     dprintf("After local reduction, h = %s.\n", h->str().c_str()); 
   }
 
-  // Merge sum and count.
+  // Merge count.
 	void merge(const RedObj& red_obj, unique_ptr<RedObj>& com_obj) override {
     const Hist* hr = static_cast<const Hist*>(&red_obj);
     Hist* hc = static_cast<Hist*>(com_obj.get());
