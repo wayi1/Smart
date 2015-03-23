@@ -161,7 +161,6 @@ class Scheduler {
   virtual void deserialize(unique_ptr<RedObj>& obj, const char* data) const = 0;
 
   // Convert a reduction object to an output result.
-  // By default, red_obj's first data member is assigned to *out.
   virtual void convert(const RedObj& red_obj, Out* out) const {} 
 
   /*
