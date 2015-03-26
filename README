@@ -1,0 +1,96 @@
+Description:
+
+Smart (in-Situ MApReduce liTe) is a MapReduce-like framework originally designed for in-situ scientific analytics.
+To maximize the performance in different in-situ scenarios, it can support two different in-situ modes: space sharing and time sharing.
+Space sharing mode aims to minimize the memory consumption of analytics, by avoiding extra data copy of simulation output, i.e., time step. This mode is generally preferred.
+Time sharing mode can support concurrent simulation and analytics on two separate groups of cores of each node.
+This mode can be more useful when simulation task reaches a scalability bottleneck with the given resources.
+In addition, offline analytics for disk-resident data (in NetCDF/HDF5 format) is also supported.
+All these modes can be switched flexibly with the same analytics code (similar to a MapReduce job).
+
+
+
+Setup Tips:
+1. To compile the source code, C++11 should be supported. The version of GNU compiler should be at least 4.8.
+If the Intel compiler is used, then some minor modification on C++11 syntax may be required (e.g., inheritance of constructor). The version of Intel compiler should be at least 14.0.
+
+2. Before running any application, the user should check if the OpenMP version is newer than 3.1.
+Setting CPU affinity can easily gain a 10X speedup.
+This can be achieved simply by setting an environment variable in the bashrc/bash_profile file:
+  export OMP_PROC_BIND=true
+
+3. Since both Scheduler and User Application Classes are template classes, if any header file is modified, "make clean" is required before recompilation.
+
+4. To make a MIC binary, the compiling flag "-mmic" should be added.
+
+5. To compile on a MIC cluster, the user should use "-openmp" rather than "-fopenmp" to enable OpenMP on a MIC cluster.
+Otherwise, the thread level in OpenMP cannot be controlled on MIC nodes.
+
+
+
+Usage:
+1. If each data chunk corresponds to a single key, call the "run" function.
+Otherwise, if each data chunk corresponds to multiple keys, call the "run2" function.
+
+2. If the output layout is fixed, and the output array can be allocated in advance, then the user can specify the output array address to the "run"/"run2" function.
+Otherwise, the user needs to transform a global combination map to a final output manually.
+Global combination map is combination_map_ on the master node, and it can be retrieved by calling the function "get_combination_map".
+
+3. 4 (pure) virtual functions are required to be overwritten for all applications:
+1) "gen_key" or "gen_keys": generates key(s) given the unit chunk;
+2) "accumulate": accumulates the unit chunk on a reduction object;
+3) "merge": merges the first reduction object into the second reduction object, i.e., a combination object;
+4) "deserialize": deserialize a user-defined reduction object. For a copiable reduction object that does not contain any reference-type data, the implementation is trivial.
+
+4. 3 virtual functions may need to be overwritten optionally for some applications.
+1) "process_extra_data": processes the extra input data to help initialize the combination map if necessary;
+2) "post-combine": performs post-combination processing if necessary;
+3) "convert": converts a reduction object to an output result if necessary.
+
+5. Run commands in time sharing mode:
+1) Using mvapich2:
+Unless global combination is not required, make sure that MV2_ENABLE_AFFINITY is set as 0.
+Otherwise, the thread level cannot be controlled.
+Example command -- run an application with 8 MPI processes by using mvapich2:
+mpirun_rsh -hostfile ./[hostfile] -np 8 MV2_ENABLE_AFFINITY=0 KMP_AFFINITY=warnings,compact ./[program]
+
+2) Using impi:
+Example command -- run an application with 8 MPI processes by using impi: 
+ibrun.symm -m [program]
+
+6. For the offline analytics, a format-specific partitioner should be used before Smart scheduler is launched.
+To process the disk-resident data in other formats, the user can create a customized partitioner class by specializing a "partitioner" class. 
+Since the input of a Smart scheduler is a 1D array, for any multi-dimensional disk-resident array data, by default it is partitioned along the highest dimension into multiple 1D arrays. 
+
+
+
+Examples:
+3 sets of example analytics applications are provided in the folder "examples", and each applicaiton can run in 3 different modes.
+Particularly, the following applications are provided:
+1) Histogram;
+2) K-Means;
+3) Logistic Regression;
+4) Window-Based Applications.
+
+Histogram:
+Make sure the value of STEP in histogram.cpp is 1.
+
+K-Means:
+Make sure the value of STEP in kmeans.cpp and the value of NUM_DIMS in kmeans.h are equal.
+
+Logistic Regression:
+Make sure the value of STEP in logistic_regression.cpp and the value of NUM_COLS (NUM_DIMS + 1) in logistic_regression.h are equal.
+
+Window-Based Applications:
+To improve the efficiency by supporting early emission of reduction object in the RedObj class, the trigger function should be overwritten.
+Moreover, the user should call the run2, not run function, to launch the data processing.
+Since these applications mostly serve as a pre-processing step in a certain analytics pipeline, global combination should be typically disabled in this case.
+
+
+
+Possible improvements:
+1. The key data type of reduction/combination map can be a string for better applicability, but this will increase the complexity of global synchronization, since string-type data does not have a fixed size.
+Keys of integer type can already meet the needs of most scientific analytics.
+2. Reduction object can be defined as a protocol buffer, to facilitate serializing variable-length data members (e.g., string type) in distributed environment.
+3. The offline analytics currently cannot work for massive arrays, since the number of array elements may overflow the size_t range.
+Besides, currently each partition is fed to Smart scheduler in one time, so this simple implementation requires that each partition should be smaller than the memory size. 

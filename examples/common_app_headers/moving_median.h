@@ -3,14 +3,16 @@
 
 #include <algorithm>
 #include <cmath>
+#include <memory>
 #include <sstream>
 #include <vector>
 
+#include "chunk.h"
 #include "scheduler.h"
 
 using namespace std;
 
-#define RADIUS 1 // Actually for 1D array, window size = radius * 2 + 1. 
+#define RADIUS 1  // Actually for 1D array, window size = radius * 2 + 1. 
 #define WIN_SIZE  2 * RADIUS + 1  // Window size.
 
 // Sliding window object. 
@@ -115,4 +117,4 @@ public:
   }
 };
 
-#endif	// _MOVING_MEDIAN_H_
+#endif  // _MOVING_MEDIAN_H_

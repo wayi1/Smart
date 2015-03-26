@@ -5,22 +5,24 @@
 #include <cfloat>
 #include <cmath>
 #include <cstring>
+#include <memory>
 
+#include "chunk.h"
 #include "scheduler.h"
 
 using namespace std;
 
-#define NUM_DIMS  8 // The # of dimensions for a point.
-#define NUM_MEANS 4 // The # of clusters/centroids.
+#define NUM_DIMS  8  // The # of dimensions for a point.
+#define NUM_MEANS 4  // The # of clusters/centroids.
 
-#define OBSERVE_CLUSTER_SIZE  0 // Need to obeserve the change of cluster sizes?
+#define OBSERVE_CLUSTER_SIZE  0  // Need to obeserve the change of cluster sizes?
 
 // Cluster assoicated data.
 template <class T>
 struct ClusterObj : public RedObj {
-  T centroid[NUM_DIMS]; // The centroid. After a cluster is formed, centroid[i] = sum[i] / size;
-  T sum[NUM_DIMS]; // The sum of coordinate value in each dimension for each point in the cluster.
-  size_t size = 0; // The # of points in the cluster.
+  T centroid[NUM_DIMS];  // The centroid. After a cluster is formed, centroid[i] = sum[i] / size;
+  T sum[NUM_DIMS];  // The sum of coordinate value in each dimension for each point in the cluster.
+  size_t size = 0;  // The # of points in the cluster.
 
   ClusterObj() {
     memset(sum, 0, NUM_DIMS * sizeof(T));
@@ -194,4 +196,4 @@ public:
   } 
 };
 
-#endif	// _KMEANS_H_
+#endif  // _KMEANS_H_

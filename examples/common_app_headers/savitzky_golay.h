@@ -3,12 +3,14 @@
 
 #include <algorithm>
 #include <cmath>
+#include <memory>
 
+#include "chunk.h"
 #include "scheduler.h"
 
 using namespace std;
 
-#define RADIUS 5 // Actually for 1D array, window size = radius * 2 + 1. 
+#define RADIUS 5  // Actually for 1D array, window size = radius * 2 + 1. 
 #define WIN_SIZE  2 * RADIUS + 1  // Window size.
 
 // Savitzky-Golay coefficientsfor the window radius of 5.
@@ -112,4 +114,4 @@ class SavitzkyGolay : public Scheduler<In, Out> {
   }
 };
 
-#endif	// _SG_H_
+#endif  // _SG_H_

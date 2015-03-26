@@ -3,12 +3,14 @@
 
 #include <algorithm>
 #include <cmath>
+#include <memory>
 
+#include "chunk.h"
 #include "scheduler.h"
 
 using namespace std;
 
-#define RADIUS 3 // Actually for 1D array, window size = radius * 2 + 1. 
+#define RADIUS 3  // Actually for 1D array, window size = radius * 2 + 1. 
 #define WIN_SIZE  2 * RADIUS + 1  // Window size.
 
 // Sliding window object. 
@@ -96,4 +98,4 @@ class MovingAverage : public Scheduler<In, Out> {
   }
 };
 
-#endif	// _MOVING_AVERAGE_H_
+#endif  // _MOVING_AVERAGE_H_
