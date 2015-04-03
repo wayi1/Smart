@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 
   // Check if the data type matches the input data of Smart scheduler.
   assert(p->is_vartype(typeid(double).name()));
- 
+
   // Since the number of buckets in the histogram is unknown, here we do not
   // define an output array.
   SchedArgs args(NUM_THREADS, STEP);

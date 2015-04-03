@@ -28,8 +28,8 @@ struct RedObj {
   // May also need to implement the copy constructor
   // if any reference-type member exists.
   virtual RedObj* clone() {
-		return new RedObj(*this);
-	}
+    return new RedObj(*this);
+  }
 
   // Convert itself to a string.
   // This function is called in Scheduler's dump function.
@@ -86,14 +86,14 @@ class Scheduler {
   // buf_size_ equals the input array's total length by default.
   // This run function is preferred when no read buffer size is specified. 
   void run(const In* data, size_t total_len, Out* out, size_t out_len) {
-	  run_space_sharing(data, total_len, total_len, out, out_len, GEN_ONE_KEY_PER_CHUNK);
+    run_space_sharing(data, total_len, total_len, out, out_len, GEN_ONE_KEY_PER_CHUNK);
   }
 
   // Run the data processing by generating multiple keys per data chunk.
   // buf_size_ equals the input array's total length by default.
   // This run function is preferred when no read buffer size is specified. 
   void run2(const In* data, size_t total_len, Out* out, size_t out_len) {
-	  run_space_sharing(data, total_len, total_len, out, out_len, GEN_KEYS_PER_CHUNK);
+    run_space_sharing(data, total_len, total_len, out, out_len, GEN_KEYS_PER_CHUNK);
   }
 
   /* Run Functions for Time Sharing Mode */
@@ -115,7 +115,7 @@ class Scheduler {
   void run2(Out* out, size_t out_len) {
     run_time_sharing(out, out_len, GEN_KEYS_PER_CHUNK);
   }
- 
+
   // Feed a time step to circular_buf_.
   // This function MUST be called by a single thread. 
   // This function is used in time sharing mode only.
@@ -175,7 +175,7 @@ class Scheduler {
 
   // Merge the first reduction object into the second reduction object, i.e.,
   // combination object.
-	virtual void merge(const RedObj& red_obj, unique_ptr<RedObj>& com_obj) = 0;
+  virtual void merge(const RedObj& red_obj, unique_ptr<RedObj>& com_obj) = 0;
 
   // Process extra data to help initialize combination_map_.
   virtual void process_extra_data() {}
@@ -196,8 +196,8 @@ class Scheduler {
    * Internal APIs for Hacking.
    */
   // Set up data processing by binding the input data.
-	void setup(const In* data, size_t total_len, size_t buf_size, Out* out, size_t out_len);
- 
+  void setup(const In* data, size_t total_len, size_t buf_size, Out* out, size_t out_len);
+
   // Process an input data chunk in the buffer, by multi-threading.
   // The input data chunk size is the total size before splitting.
   // If the buffer is full, which occurs almost all the time,
@@ -250,7 +250,7 @@ class Scheduler {
   virtual bool next(unique_ptr<Chunk>& unit_chunk, const Chunk& split) const;
 
   // Perform the local reduction.
-	void reduce(MAPPING_MODE_T mode);
+  void reduce(MAPPING_MODE_T mode);
 
   int num_threads_;
   int num_nodes_;
@@ -292,11 +292,11 @@ Scheduler<In, Out>::Scheduler(const SchedArgs& args) : num_threads_(args.num_thr
 
   if (rank_ == 0)
     printf("Scheduler: Initializing with %d threads and %d nodes...\n", args.num_threads, num_nodes_);
-	assert(args.num_threads > 0);
+  assert(args.num_threads > 0);
   assert(args.step > 0);
 
   if (rank_ == 0)
-	  printf("Scheduler: Constructing the reduction map for all the threads...\n"); 
+    printf("Scheduler: Constructing the reduction map for all the threads...\n"); 
   for (int i = 0; i < num_threads_; ++i) {
     map<int, unique_ptr<RedObj>> loc_reduction_map;
     reduction_map_.emplace_back(move(loc_reduction_map));
@@ -425,26 +425,26 @@ void Scheduler<In, Out>::run_space_sharing(const In* data, size_t total_len, siz
   //if (num_iters_ > 1 && rank_ == 0) {
   //  dprintf("Scheduler: # of iterations = %d.\n", num_iters_);
   //}
- 
+
   //dprintf("Scheduler: Processing time on node %d = %.2f secs.\n", rank_, elapsed_seconds.count());
 }
 
 template <class In, class Out>
 void Scheduler<In, Out>::run_time_sharing(Out* out, size_t out_len, MAPPING_MODE_T mapping_mode) {
-    // Wait for a produced cell.
-    while(!cell_flags_[c_idx_]) {
-      dprintf("Scheduler: Waiting for producing time steps...\n");
-      sleep(1);
-    }
+  // Wait for a produced cell.
+  while(!cell_flags_[c_idx_]) {
+    dprintf("Scheduler: Waiting for producing time steps...\n");
+    sleep(1);
+  }
 
-    dprintf("Scheduler: Dequeue a new time step...\n");
-    if (mapping_mode == GEN_ONE_KEY_PER_CHUNK)
-      Scheduler<In, Out>::run(circular_buf_[c_idx_], total_len_, out, out_len);
-    else  // mapping_mode = GEN_KEYS_PER_CHUNK.
-      Scheduler<In, Out>::run2(circular_buf_[c_idx_], total_len_, out, out_len);
+  dprintf("Scheduler: Dequeue a new time step...\n");
+  if (mapping_mode == GEN_ONE_KEY_PER_CHUNK)
+    Scheduler<In, Out>::run(circular_buf_[c_idx_], total_len_, out, out_len);
+  else  // mapping_mode = GEN_KEYS_PER_CHUNK.
+    Scheduler<In, Out>::run2(circular_buf_[c_idx_], total_len_, out, out_len);
 
-    cell_flags_[c_idx_] = false;
-    c_idx_ = (c_idx_ + 1) % CIRCULAR_BUF_SIZE_;
+  cell_flags_[c_idx_] = false;
+  c_idx_ = (c_idx_ + 1) % CIRCULAR_BUF_SIZE_;
 }
 
 
@@ -459,7 +459,7 @@ void Scheduler<In, Out>::process_chunk(const Chunk& input, MAPPING_MODE_T mode) 
   // Splitting (or local partitioning) is done by the master thread.
   split();
 
-  #pragma omp parallel num_threads(num_threads_)
+#pragma omp parallel num_threads(num_threads_)
   {
     reduce(mode);
   }
@@ -501,11 +501,11 @@ void Scheduler<In, Out>::distribute_global_combination_map() {
 
   // Generate global combination map from received vectorized (local) combination_map_.
   if (rank_ != 0) {
-      combination_map_.clear();
+    combination_map_.clear();
 
-      for (int i = 0; i < num_red_objs; ++i) {
-        deserialize(combination_map_[keys[i]], &red_objs[i * red_obj_size_]);
-      }
+    for (int i = 0; i < num_red_objs; ++i) {
+      deserialize(combination_map_[keys[i]], &red_objs[i * red_obj_size_]);
+    }
   }
 
   dprintf("Scheduler: Combination map after distributing global combination map on node %d.\n", rank_);
@@ -518,7 +518,7 @@ template <class In, class Out>
 void Scheduler<In, Out>::distribute_local_combination_map() {
   dprintf("Scheduler: Distribute combination_map_ to each local reduction map.\n");
 
-  #pragma omp parallel num_threads(num_threads_)
+#pragma omp parallel num_threads(num_threads_)
   {
     int tid = omp_get_thread_num();
     reduction_map_[tid].clear();
@@ -560,7 +560,7 @@ bool Scheduler<In, Out>::next(unique_ptr<Chunk>& unit_chunk, const Chunk& split)
   if (unit_chunk != nullptr) {
     unit_chunk->start += unit_chunk->length; 
     // The length equals step_, so remain unchanged for the non-last unit chunk.
-    
+
     size_t split_end = split.start + split.length;
     if (unit_chunk->start + unit_chunk->length >= split_end) {
       unit_chunk->length = split_end - unit_chunk->start;
@@ -631,7 +631,7 @@ void Scheduler<In, Out>::local_combine() {
       if (combination_map_.find(pair.first) != combination_map_.end()) {
         merge(*pair.second, combination_map_[pair.first]);
       } else {
-       combination_map_[pair.first] = move(pair.second);
+        combination_map_[pair.first] = move(pair.second);
       }
     }
   }
@@ -733,21 +733,21 @@ void Scheduler<In, Out>::feed(const In* data, size_t total_len) {
 
 template <class In, class Out>
 void Scheduler<In, Out>::dump_reduction_map() const {
-	printf("Reduction map on node %d:\n", rank_);
-	for (int i = 0; i < num_threads_; ++i) {
-		printf("\tLocal reduciton map %d:\n", i);
-		for (const auto& pair : reduction_map_[i]) {
-			printf("\t\t(key = %d, value = %s)\n", pair.first, (pair.second != nullptr ? pair.second->str().c_str() : "NULL"));
-		}
-	}
+  printf("Reduction map on node %d:\n", rank_);
+  for (int i = 0; i < num_threads_; ++i) {
+    printf("\tLocal reduciton map %d:\n", i);
+    for (const auto& pair : reduction_map_[i]) {
+      printf("\t\t(key = %d, value = %s)\n", pair.first, (pair.second != nullptr ? pair.second->str().c_str() : "NULL"));
+    }
+  }
 }
 
 template <class In, class Out>
 void Scheduler<In, Out>::dump_combination_map() const {
-	printf("Combination map on node %d:\n", rank_);
-	for (const auto& pair : combination_map_) {
-		printf("\t(key = %d, value = %s)\n", pair.first, (pair.second != nullptr ? pair.second->str().c_str() : "NULL"));
-	}
+  printf("Combination map on node %d:\n", rank_);
+  for (const auto& pair : combination_map_) {
+    printf("\t(key = %d, value = %s)\n", pair.first, (pair.second != nullptr ? pair.second->str().c_str() : "NULL"));
+  }
 }
 
 #endif  // _SCHEDULER_H_

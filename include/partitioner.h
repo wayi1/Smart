@@ -52,7 +52,7 @@ class Partitioner {
 
   // Get the length of each dimension.
   virtual void get_dimlens(size_t dimlens[]) const = 0;
- 
+
   // Get the total length of the 1D array associcated with the viriable.
   virtual size_t get_varlen() const = 0;
 

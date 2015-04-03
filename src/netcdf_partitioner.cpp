@@ -93,7 +93,7 @@ int NetCDFPartitioner::get_ndims() const {
   // Get the variable ID.
   int varid;
   nc_inq_varid(ncid, varname_.c_str(), &varid);	
- 
+
   // Get the dimensionality.
   int ndims;
   nc_inq_varndims(ncid, varid, &ndims);
@@ -112,7 +112,7 @@ void NetCDFPartitioner::get_dimlens(size_t dimlens[]) const {
   // Get the variable ID.
   int varid;
   nc_inq_varid(ncid, varname_.c_str(), &varid);	
- 
+
   // Get the dimensionality.
   int ndims;
   nc_inq_varndims(ncid, varid, &ndims);
@@ -120,7 +120,7 @@ void NetCDFPartitioner::get_dimlens(size_t dimlens[]) const {
   // Get the dimension IDs.
   int dimids[ndims];  // The ID of each dimension.
   nc_inq_vardimid(ncid, varid, dimids);
-  
+
   for (int i = 0; i < ndims; ++i) {
     nc_inq_dimlen(ncid, dimids[i], &dimlens[i]);
   }
@@ -137,7 +137,7 @@ size_t NetCDFPartitioner::get_varlen() const {
   // Get the variable ID.
   int varid;
   nc_inq_varid(ncid, varname_.c_str(), &varid);	
- 
+
   // Get the dimensionality.
   int ndims;
   nc_inq_varndims(ncid, varid, &ndims);
@@ -145,7 +145,7 @@ size_t NetCDFPartitioner::get_varlen() const {
   // Get the dimension IDs.
   int dimids[ndims];  // The ID of each dimension.
   nc_inq_vardimid(ncid, varid, dimids);
-  
+
   size_t dimlens[ndims];  // The dimension lengths.
   size_t varlen = 1;
   for (int i = 0; i < ndims; ++i) {

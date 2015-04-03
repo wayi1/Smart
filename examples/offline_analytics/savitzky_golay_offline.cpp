@@ -39,10 +39,10 @@ int main(int argc, char* argv[]) {
 
   SchedArgs args(NUM_THREADS, STEP);
   unique_ptr<Scheduler<double, double>> win_app(new SavitzkyGolay<double, double>(args));
-	win_app->set_red_obj_size(sizeof(WinObj));   
+  win_app->set_red_obj_size(sizeof(WinObj));   
   win_app->set_glb_combine(false);
   win_app->run2((const double*)p->get_data(), p->get_len(), out, out_len);
- 
+
   // Print out the combination map if required.
   if (PRINT_COMBINATION_MAP && rank == 0) {
     printf("\n");
@@ -61,6 +61,6 @@ int main(int argc, char* argv[]) {
   delete [] out;
 
   MPI_Finalize();
- 
+
   return 0;
 }

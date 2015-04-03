@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
     printf("Run in-situ processing...\n");
   SchedArgs args(NUM_THREADS, STEP);
   unique_ptr<Scheduler<float, double>> win_app(new SavitzkyGolay<float, double>(args));
-	win_app->set_red_obj_size(sizeof(WinObj));   
+  win_app->set_red_obj_size(sizeof(WinObj));   
   win_app->set_glb_combine(false);
   win_app->run2(in, total_len, out, out_len);
   if (rank == 0)

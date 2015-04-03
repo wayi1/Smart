@@ -30,5 +30,5 @@ class NetCDFPartitioner : public Partitioner {
   // Get the total length of the 1D array associcated with the viriable.
   size_t get_varlen() const override;
 };
-#endif  // _NETCDF_PARTITIONER_H_
 
+#endif  // _NETCDF_PARTITIONER_H_

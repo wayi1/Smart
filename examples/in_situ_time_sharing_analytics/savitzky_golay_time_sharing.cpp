@@ -21,7 +21,7 @@ using namespace std;
 
 // Run the given simulation.
 void simulate(float* in, size_t total_len, int num_threads) {
-  #pragma omp parallel for num_threads(num_threads)
+#pragma omp parallel for num_threads(num_threads)
   for (size_t i = 0; i < total_len; ++i) {
     in[i] = i % GRID_SIZE;
   }
@@ -32,10 +32,10 @@ int main(int argc, char* argv[]) {
   int mpi_status = MPI_Init(&argc, &argv);  // This MPI environment initialization is not thread-safe.
 
   /* If no global synchronization is required, then no need to upgrade thread level.
-  int provided;  // Provided thread level.
-  int request = MPI_THREAD_MULTIPLE;  // The thread level must be MPI_THREAD_MULTIPLE.
-  int mpi_status = MPI_Init_thread(&argc, &argv, request, &provided);
-  */
+     int provided;  // Provided thread level.
+     int request = MPI_THREAD_MULTIPLE;  // The thread level must be MPI_THREAD_MULTIPLE.
+     int mpi_status = MPI_Init_thread(&argc, &argv, request, &provided);
+     */
   if (mpi_status != MPI_SUCCESS) {
     printf("Failed to initialize MPI environment.\n");
     MPI_Abort(MPI_COMM_WORLD, mpi_status);
@@ -46,18 +46,18 @@ int main(int argc, char* argv[]) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   /* If no global synchronization is required, then no need to upgrade thread level.
-  if (request != provided && rank == 0) {
-    printf("Failed to initialize MPI thread level at %d, the current level is %d.\n", request, provided);
+     if (request != provided && rank == 0) {
+     printf("Failed to initialize MPI thread level at %d, the current level is %d.\n", request, provided);
 
-    printf("Thread level information:\n");
-    printf("MPI_THREAD_SINGLE = %d\n",  MPI_THREAD_SINGLE);
-    printf("MPI_THREAD_FUNNELED = %d\n",  MPI_THREAD_FUNNELED);
-    printf("MPI_THREAD_SERIALIZED = %d\n",  MPI_THREAD_SERIALIZED);
-    printf("MPI_THREAD_MULTIPLE = %d\n",  MPI_THREAD_MULTIPLE);
+     printf("Thread level information:\n");
+     printf("MPI_THREAD_SINGLE = %d\n",  MPI_THREAD_SINGLE);
+     printf("MPI_THREAD_FUNNELED = %d\n",  MPI_THREAD_FUNNELED);
+     printf("MPI_THREAD_SERIALIZED = %d\n",  MPI_THREAD_SERIALIZED);
+     printf("MPI_THREAD_MULTIPLE = %d\n",  MPI_THREAD_MULTIPLE);
 
-    MPI_Abort(MPI_COMM_WORLD, mpi_status);
-  }
-  */
+     MPI_Abort(MPI_COMM_WORLD, mpi_status);
+     }
+     */
 
   size_t total_len = NUM_ELEMS;
   float* in = new float[total_len];
@@ -77,13 +77,13 @@ int main(int argc, char* argv[]) {
 
   SchedArgs args(num_threads2, STEP); 
   unique_ptr<Scheduler<float, double>> win_app(new SavitzkyGolay<float, double>(args));
-	win_app->set_red_obj_size(sizeof(WinObj));
+  win_app->set_red_obj_size(sizeof(WinObj));
   win_app->set_glb_combine(false);
 
-  #pragma omp parallel num_threads(num_tasks)
-  #pragma omp single
+#pragma omp parallel num_threads(num_tasks)
+#pragma omp single
   {
-    #pragma omp task  // Simulation task.
+#pragma omp task  // Simulation task.
     {
       for (int i = 0; i < num_runs; ++i) {
         // Run simulation in parallel.
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
       }
     }
 
-    #pragma omp task  // Analytics task.
+#pragma omp task  // Analytics task.
     {
       for (int i = 0; i < num_runs; ++i) {
         win_app->run2(out, out_len);

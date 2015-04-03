@@ -22,7 +22,7 @@ void HDF5Partitioner::init_vartype() {
   if (t_class == H5T_INTEGER) {
     type_ = typeid(int).name();
   } else if (t_class == H5T_FLOAT && H5Tget_size(vartype) == 4) {
-      type_ = typeid(float).name();
+    type_ = typeid(float).name();
   } else if (t_class == H5T_FLOAT && H5Tget_size(vartype) == 8) {
     type_ = typeid(double).name();
   } else {

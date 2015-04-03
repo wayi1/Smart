@@ -21,7 +21,7 @@ using namespace std;
 
 // Run the given simulation.
 void simulate(float* in, size_t total_len, int num_threads) {
-  #pragma omp parallel for num_threads(num_threads)
+#pragma omp parallel for num_threads(num_threads)
   for (size_t i = 0; i < total_len; ++i) {
     in[i] = i % GRID_SIZE;
   }
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
     printf("MPI_THREAD_FUNNELED = %d\n",  MPI_THREAD_FUNNELED);
     printf("MPI_THREAD_SERIALIZED = %d\n",  MPI_THREAD_SERIALIZED);
     printf("MPI_THREAD_MULTIPLE = %d\n",  MPI_THREAD_MULTIPLE);
- 
+
     MPI_Abort(MPI_COMM_WORLD, mpi_status);
   }
 
@@ -74,10 +74,10 @@ int main(int argc, char* argv[]) {
   unique_ptr<Scheduler<float, size_t>> h(new Histogram<float>(args));   
   h->set_red_obj_size(sizeof(Hist));
 
-  #pragma omp parallel num_threads(num_tasks)
-  #pragma omp single
+#pragma omp parallel num_threads(num_tasks)
+#pragma omp single
   {
-    #pragma omp task  // Simulation task.
+#pragma omp task  // Simulation task.
     {
       for (int i = 0; i < num_runs; ++i) {
         // Run simulation in parallel.
@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
       }
     }
 
-    #pragma omp task  // Analytics task.
+#pragma omp task  // Analytics task.
     {
       for (int i = 0; i < num_runs; ++i) {
         h->run(nullptr, 0);  // Note that here the output array is nullptr.

@@ -26,7 +26,7 @@ int main() {
   for (size_t i = 0; i < NUM_ELEMS; ++i) {
     points[i] = i;
   }
-  
+
   // Write data.
   nc_put_var_double(fid, varid, points);
 

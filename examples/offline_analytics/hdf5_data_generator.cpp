@@ -22,10 +22,10 @@ int main() {
   cout << "The generated file contains " << NUM_ELEMS << " points." << endl;
 
   // Create the file.
-	fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
   // Write data.
-	H5LTmake_dataset_double(fid, VARNAME, 1, dims, points);
+  H5LTmake_dataset_double(fid, VARNAME, 1, dims, points);
 
   H5Fclose(fid);
 
