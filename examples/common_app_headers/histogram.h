@@ -48,17 +48,17 @@ public:
   }
 
   // Merge count.
-	void merge(const RedObj& red_obj, unique_ptr<RedObj>& com_obj) override {
+  void merge(const RedObj& red_obj, unique_ptr<RedObj>& com_obj) override {
     const Hist* hr = static_cast<const Hist*>(&red_obj);
     Hist* hc = static_cast<Hist*>(com_obj.get());
 
     hc->count += hr->count;
   }
 
-	// Deserialize reduction object. 
+  // Deserialize reduction object. 
   void deserialize(unique_ptr<RedObj>& obj, const char* data) const override {
-		obj.reset(new Hist);
-	  memcpy(obj.get(), data, sizeof(Hist));
+    obj.reset(new Hist);
+    memcpy(obj.get(), data, sizeof(Hist));
   }
 
   // Convert a reduction object into a desired output element.
