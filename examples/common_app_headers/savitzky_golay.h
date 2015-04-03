@@ -81,7 +81,7 @@ class SavitzkyGolay : public Scheduler<In, Out> {
     WinObj* w = static_cast<WinObj*>(red_obj.get());  
     for (size_t i = 0; i < chunk.length; ++i) {
       dprintf("Adding the element chunk[%lu] = %.0f.\n", chunk.start + i, this->data_[chunk.start + i]);
-      
+
       size_t val_pos = chunk.start + i;
       double val = (double)this->data_[val_pos];
       size_t idx = val_pos >= w->pos ? val_pos - w->pos : w->pos - val_pos;

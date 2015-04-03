@@ -34,8 +34,8 @@ struct ClusterObj : public RedObj {
 
   // Required only if distributing combination map is critical.
   RedObj* clone() override {
-		return new ClusterObj(*this);
-	}
+    return new ClusterObj(*this);
+  }
 
   // Optional, only used for rendering the result.
   string str() const override {
@@ -78,7 +78,7 @@ struct ClusterObj : public RedObj {
 
 template <class T>
 class Kmeans : public Scheduler<T, T*> {
-public:
+ public:
   using Scheduler<T, T*>::Scheduler;
 
   // Each chunk is viewed as a multi-dimensional point.
@@ -88,7 +88,7 @@ public:
       return NAN;
 
     assert(chunk.length == NUM_DIMS);
-     
+
     T min_sq_dist = (T)DBL_MAX;
     T cur_sq_dist = (T)DBL_MAX;
     int cluster_id = -1;
@@ -136,11 +136,11 @@ public:
     com_cluster_obj->size += red_cluster_obj->size;
   }
 
-	// Deserialize reduction object. 
+  // Deserialize reduction object. 
   void deserialize(unique_ptr<RedObj>& obj, const char* data) const override {
-		obj.reset(new ClusterObj<T>);
-		memcpy(obj.get(), data, sizeof(ClusterObj<T>));
-	}
+    obj.reset(new ClusterObj<T>);
+    memcpy(obj.get(), data, sizeof(ClusterObj<T>));
+  }
 
   // Convert a reduction object into a desired output element.
   void convert(const RedObj& red_obj, T** out) const override {

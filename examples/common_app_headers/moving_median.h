@@ -40,33 +40,33 @@ struct WinObj : public RedObj {
 
 template <class In, class Out>
 class MovingMedian : public Scheduler<In, Out> {
-public:
+ public:
   using Scheduler<In, Out>::Scheduler;
 
   // Group elements into buckets.
   void gen_keys(const Chunk& chunk, vector<int>& keys) const override {
-      dprintf("For chunk[%lu], genrate key %lu from node%d...\n", chunk.start, chunk.start, this->rank_);
-      keys.emplace_back(chunk.start);
-      // Assume that chunk.start + RADIUS will be within the size_t value
-      // range.
-      for (size_t i = chunk.start + 1; i <= min(chunk.start + RADIUS, this->total_len_ - 1); ++i) {
-          dprintf("For chunk[%lu], genrate key %lu from node%d...\n", chunk.start, i, this->rank_);
-          keys.emplace_back(i);
-      }
+    dprintf("For chunk[%lu], genrate key %lu from node%d...\n", chunk.start, chunk.start, this->rank_);
+    keys.emplace_back(chunk.start);
+    // Assume that chunk.start + RADIUS will be within the size_t value
+    // range.
+    for (size_t i = chunk.start + 1; i <= min(chunk.start + RADIUS, this->total_len_ - 1); ++i) {
+      dprintf("For chunk[%lu], genrate key %lu from node%d...\n", chunk.start, i, this->rank_);
+      keys.emplace_back(i);
+    }
 
-      // Note that since the type size_t is unsigned,
-      // chunk.start - RADIUS can be a large positive value than a negative value.
-      if (chunk.start >= RADIUS) { 
-        for (size_t i = chunk.start - RADIUS; i < chunk.start; ++i) {
-          dprintf("For chunk[%lu], genrate key %lu from node%d...\n", chunk.start, i, this->rank_);
-          keys.emplace_back(i);
-        }
-      } else {
-        for (size_t i = 0; i < chunk.start; ++i) {
-          dprintf("For chunk[%lu], genrate key %lu from node%d...\n", chunk.start, i, this->rank_);
-          keys.emplace_back(i);
-        }
+    // Note that since the type size_t is unsigned,
+    // chunk.start - RADIUS can be a large positive value than a negative value.
+    if (chunk.start >= RADIUS) { 
+      for (size_t i = chunk.start - RADIUS; i < chunk.start; ++i) {
+        dprintf("For chunk[%lu], genrate key %lu from node%d...\n", chunk.start, i, this->rank_);
+        keys.emplace_back(i);
       }
+    } else {
+      for (size_t i = 0; i < chunk.start; ++i) {
+        dprintf("For chunk[%lu], genrate key %lu from node%d...\n", chunk.start, i, this->rank_);
+        keys.emplace_back(i);
+      }
+    }
   }
 
   // Accumulate the window.
@@ -86,7 +86,7 @@ public:
   }
 
   // Merge the two windows.
-	void merge(const RedObj& red_obj, unique_ptr<RedObj>& com_obj) override {
+  void merge(const RedObj& red_obj, unique_ptr<RedObj>& com_obj) override {
     const WinObj* wr = static_cast<const WinObj*>(&red_obj);
     WinObj* wc = static_cast<WinObj*>(com_obj.get());
 
@@ -96,10 +96,10 @@ public:
     }
   }
 
-	// Deserialize reduction object. 
+  // Deserialize reduction object. 
   void deserialize(unique_ptr<RedObj>& obj, const char* data) const override {
-		obj.reset(new WinObj);
-	  memcpy(obj.get(), data, sizeof(WinObj));
+    obj.reset(new WinObj);
+    memcpy(obj.get(), data, sizeof(WinObj));
   }
 
   // Convert a reduction object into a desired output element.

@@ -24,12 +24,12 @@ struct Hist : public RedObj {
 
 template <class In>
 class Histogram : public Scheduler<In, size_t> {
-public:
+ public:
   using Scheduler<In, size_t>::Scheduler;
 
   // Group elements into buckets.
   int gen_key(const Chunk& chunk) const override {
-      return (int)(this->data_[chunk.start] - MIN_VAL) / BUCKET_WIDTH;
+    return (int)(this->data_[chunk.start] - MIN_VAL) / BUCKET_WIDTH;
   }
 
   // Accumulate sum and count.

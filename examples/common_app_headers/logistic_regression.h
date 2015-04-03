@@ -156,9 +156,9 @@ class LogisticRegression : public Scheduler<In, double*> {
 
   // Deserialize reduction object. 
   void deserialize(unique_ptr<RedObj>& obj, const char* data) const override {
-		obj.reset(new GradientObj);
-		memcpy(obj.get(), data, sizeof(GradientObj));
-	}
+    obj.reset(new GradientObj);
+    memcpy(obj.get(), data, sizeof(GradientObj));
+  }
 
   // Convert a reduction object into a desired output element.
   void convert(const RedObj& red_obj, double** out) const override {
