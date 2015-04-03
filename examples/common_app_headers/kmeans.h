@@ -108,7 +108,7 @@ public:
     return cluster_id;
   }
 
-  // Acumulate sum and size.
+  // Accumulate sum and size.
   void accumulate(const Chunk& chunk, unique_ptr<RedObj>& red_obj) override {
     if (chunk.empty())
       return;

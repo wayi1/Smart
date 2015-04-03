@@ -69,7 +69,7 @@ public:
       }
   }
 
-  // Acumulate the window.
+  // Accumulate the window.
   void accumulate(const Chunk& chunk, unique_ptr<RedObj>& red_obj) override {
     if (red_obj == nullptr) {
       red_obj.reset(new WinObj);

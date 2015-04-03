@@ -70,7 +70,7 @@ class SavitzkyGolay : public Scheduler<In, Out> {
     }
   }
 
-  // Acumulate sum and count.
+  // Accumulate sum and count.
   void accumulate(const Chunk& chunk, unique_ptr<RedObj>& red_obj) override {
     if (red_obj == nullptr) {
       red_obj.reset(new WinObj);
