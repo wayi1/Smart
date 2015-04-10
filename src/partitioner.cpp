@@ -30,7 +30,7 @@ void Partitioner::load_partition() {
   // Partition the data in the highest dimension.
   if (ndims == 1) {
     size_t total_pts = total_len / step_;  // The total number of input data points.
-    count[0] = total_pts / num_nodes_;
+    count[0] = total_pts / num_nodes_ * step_;
     start[0] = rank_ * count[0];
     if (total_pts % num_nodes_ != 0 && rank_ == num_nodes_ - 1) {
       count[0] += total_pts % num_nodes_ * step_;
