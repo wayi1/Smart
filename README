@@ -13,7 +13,7 @@ All these modes can be switched flexibly with the same analytics code (similar t
 Setup Tips:
 1. To compile the source code, C++11 should be supported. The version of GNU compiler should be at least 4.8.
 If the Intel compiler is used, then some minor modification on C++11 syntax may be required (e.g., inheritance of constructor). The version of Intel compiler should be at least 14.0.
-mo
+
 2. Before running any application, the user should check if the OpenMP version is newer than 3.1.
 Setting CPU affinity can easily gain a 10X speedup.
 This can be achieved simply by setting an environment variable in the bashrc/bash_profile file:
