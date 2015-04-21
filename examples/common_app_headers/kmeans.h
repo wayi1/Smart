@@ -5,6 +5,7 @@
 #include <cfloat>
 #include <cmath>
 #include <cstring>
+#include <map>
 #include <memory>
 
 #include "chunk.h"
@@ -83,7 +84,7 @@ class Kmeans : public Scheduler<T, T*> {
 
   // Each chunk is viewed as a multi-dimensional point.
   // Identify the cluster index given the point and all the current centroids.
-  int gen_key(const Chunk& chunk) const override {
+  int gen_key(const Chunk& chunk, const T* data, map<int, unique_ptr<RedObj>>& combination_map) const override {
     if (chunk.empty())
       return NAN;
 
@@ -94,10 +95,10 @@ class Kmeans : public Scheduler<T, T*> {
     int cluster_id = -1;
 
     for (int i = 0; i < NUM_MEANS; ++i) {
-      const ClusterObj<T>* cur_cluster_obj = static_cast<const ClusterObj<T>*>(this->combination_map_.find(i)->second.get());
+      const ClusterObj<T>* cur_cluster_obj = static_cast<const ClusterObj<T>*>(combination_map.find(i)->second.get());
       const T* centroid = cur_cluster_obj->centroid;
 
-      cur_sq_dist = ClusterObj<T>::sq_dist(centroid, &this->data_[chunk.start]);
+      cur_sq_dist = ClusterObj<T>::sq_dist(centroid, &data[chunk.start]);
       if (cur_sq_dist < min_sq_dist) {
         min_sq_dist = cur_sq_dist;
         cluster_id = i;
@@ -109,7 +110,7 @@ class Kmeans : public Scheduler<T, T*> {
   }
 
   // Accumulate sum and size.
-  void accumulate(const Chunk& chunk, unique_ptr<RedObj>& red_obj) override {
+  void accumulate(const Chunk& chunk, const T* data, unique_ptr<RedObj>& red_obj) override {
     if (chunk.empty())
       return;
 
@@ -119,7 +120,7 @@ class Kmeans : public Scheduler<T, T*> {
     ClusterObj<T>* cluster_obj = static_cast<ClusterObj<T>*>(red_obj.get());
     dprintf("chunk.start = %lu, cluster_obj = %s.\n", chunk.start, cluster_obj->str().c_str());
     for (int i = 0; i < NUM_DIMS; ++i) {
-      cluster_obj->sum[i] += this->data_[chunk.start + i];
+      cluster_obj->sum[i] += data[chunk.start + i];
     }
     cluster_obj->size++;
     dprintf("After local reduction, cluster_obj = %s.\n", cluster_obj->str().c_str());
@@ -149,28 +150,28 @@ class Kmeans : public Scheduler<T, T*> {
   }
 
   /* Additional Function Overriding */
-  // Set up the initial centroids in combination_map_.
-  void process_extra_data() override {
+  // Set up the initial centroids in combination_map.
+  void process_extra_data(const void* extra_data, map<int, unique_ptr<RedObj>>& combination_map) override {
     dprintf("Scheduler: Processing extra data...\n");
 
-    assert(this->extra_data_ != nullptr);
-    const T** centroids = (const T**)this->extra_data_;
+    assert(extra_data != nullptr);
+    const T** centroids = (const T**)extra_data;
     for (int i = 0; i < NUM_MEANS; ++i) {
       // Initialize the result cluster with the initial centroids
       unique_ptr<ClusterObj<T>> cluster_obj(new ClusterObj<T>);
       memcpy(cluster_obj->centroid, centroids[i], NUM_DIMS * sizeof(T));
 
-      // Update combination_map_.
-      this->combination_map_[i] = move(cluster_obj);
-      dprintf("combination_map_[%d] = %s\n", i, this->combination_map_[i]->str().c_str());
+      // Update combination_map.
+      combination_map[i] = move(cluster_obj);
+      dprintf("combination_map[%d] = %s\n", i, combination_map[i]->str().c_str());
     }
   }
 
-  // Finalize combinaion_map_.
-  void post_combine() override {
+  // Finalize combinaion_map.
+  void post_combine(map<int, unique_ptr<RedObj>>& combination_map) override {
     if (!OBSERVE_CLUSTER_SIZE) {
       // Process update and clearance altogether.
-      for (auto& pair : this->combination_map_) {
+      for (auto& pair : combination_map) {
         ClusterObj<T>* cluster_obj = static_cast<ClusterObj<T>*>(pair.second.get());         
         // Update the centroids for each cluster.
         cluster_obj->update_centroid();
@@ -179,7 +180,7 @@ class Kmeans : public Scheduler<T, T*> {
         cluster_obj->clear();
       }
     } else {  // Process update and clearance in separate loops to observe the change of cluster sizes.
-      for (auto& pair : this->combination_map_) {
+      for (auto& pair : combination_map) {
         ClusterObj<T>* cluster_obj = static_cast<ClusterObj<T>*>(pair.second.get());         
         // Update the centroids for each cluster.
         cluster_obj->update_centroid();
@@ -187,7 +188,7 @@ class Kmeans : public Scheduler<T, T*> {
       printf("Local combination map before cluster object clearance.\n");
       this->dump_combination_map();
 
-      for (auto& pair : this->combination_map_) {
+      for (auto& pair : combination_map) {
         ClusterObj<T>* cluster_obj = static_cast<ClusterObj<T>*>(pair.second.get());         
         // Clear sum and size in the cluster object.
         cluster_obj->clear();

@@ -165,25 +165,25 @@ class Scheduler {
    */
   // A derivation on either gen_key or gen_keys is required.
   // Generate an (integer) key given a chunk.
-  virtual int gen_key(const Chunk& chunk) const {return -1;}
+  virtual int gen_key(const Chunk& chunk, const In* data, map<int, unique_ptr<RedObj>>& combination_map) const {return -1;}
 
   // Generate (integer) keys given a chunk.
-  virtual void gen_keys(const Chunk& chunk, vector<int>& keys) const {}
+  virtual void gen_keys(const Chunk& chunk, const In* data, vector<int>& keys, map<int, unique_ptr<RedObj>>& combination_map) const {}
 
   // Accumulate the chunk on a reduction object.
-  virtual void accumulate(const Chunk& chunk, unique_ptr<RedObj>& red_obj) = 0;
+  virtual void accumulate(const Chunk& chunk, const In* data, unique_ptr<RedObj>& red_obj) = 0;
 
   // Merge the first reduction object into the second reduction object, i.e.,
   // combination object.
   virtual void merge(const RedObj& red_obj, unique_ptr<RedObj>& com_obj) = 0;
 
   // Process extra data to help initialize combination_map_.
-  virtual void process_extra_data() {}
+  virtual void process_extra_data(const void* extra_data, map<int, unique_ptr<RedObj>>& combination_map) {}
 
   // Perform post-combination processing.
   // This function will only be applied to the global combination map.
   // Thus, this function will only be called by the master node.
-  virtual void post_combine() {}
+  virtual void post_combine(map<int, unique_ptr<RedObj>>& combination_map) {}
 
   // Construct a reduction object from serialized reduction object.
   // Usually only a trivial implementation is needed.
@@ -336,7 +336,7 @@ void Scheduler<In, Out>::run_space_sharing(const In* data, size_t total_len, siz
   // Set up the scheduler.
   setup(data, total_len, buf_size, out, out_len);
   // Process extra_data_ to help intialize combination_map_.
-  process_extra_data();
+  process_extra_data(extra_data_, combination_map_);
 
   if (rank_ == 0) {
     dprintf("Combination map after processing extra data...\n");
@@ -406,7 +406,7 @@ void Scheduler<In, Out>::run_space_sharing(const In* data, size_t total_len, siz
     // It is meaningless to perform post-combination on slave nodes,
     // since global results are only maintained on the master node.
     if (rank_ == 0) {
-      post_combine();
+      post_combine(combination_map_);
 
       dprintf("Global combination map after post-combination at iteration %d...\n", iter);
       //dump_combination_map();
@@ -593,8 +593,8 @@ void Scheduler<In, Out>::reduce(MAPPING_MODE_T mode) {
     is_last = next(chunk, splits_[tid]);
 
     if (mode == GEN_ONE_KEY_PER_CHUNK) {  // Perform reduction with gen_key.
-      int key = gen_key(*chunk);
-      accumulate(*chunk, reduction_map_[tid][key]);
+      int key = gen_key(*chunk, data_, combination_map_);
+      accumulate(*chunk, data_, reduction_map_[tid][key]);
       // Check if the early emission can be triggered.
       if (reduction_map_[tid].find(key)->second->trigger()) {
         dprintf("Scheduler: The reduction object %s is emitted by trigger...\n", reduction_map_[tid].find(key)->second->str().c_str());
@@ -604,10 +604,10 @@ void Scheduler<In, Out>::reduce(MAPPING_MODE_T mode) {
       }
     } else { // mode == GEN_KEYS_PER_CHUNK, and perform reduction with gen_keys.
       vector<int> keys;
-      gen_keys(*chunk, keys);
+      gen_keys(*chunk, data_, keys, combination_map_);
 
       for (int key : keys) {
-        accumulate(*chunk, reduction_map_[tid][key]);
+        accumulate(*chunk, data_, reduction_map_[tid][key]);
         // Check if the early emission can be triggered.
         if (reduction_map_[tid].find(key)->second->trigger()) {
           dprintf("Scheduler: The reduction object %s is emitted by trigger...\n", reduction_map_[tid].find(key)->second->str().c_str());

@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <map>
 #include <memory>
 
 #include "chunk.h"
@@ -35,7 +36,7 @@ class MovingAverage : public Scheduler<In, Out> {
   using Scheduler<In, Out>::Scheduler;
 
   // Group elements into buckets.
-  void gen_keys(const Chunk& chunk, vector<int>& keys) const override {
+  void gen_keys(const Chunk& chunk, const In* data, vector<int>& keys, map<int, unique_ptr<RedObj>>& combination_map) const override {
     dprintf("For chunk[%lu], genrate key %lu from node%d...\n", chunk.start, chunk.start, this->rank_);
     keys.emplace_back(chunk.start);
     // Assume that chunk.start + RADIUS will be within the size_t value
@@ -61,15 +62,15 @@ class MovingAverage : public Scheduler<In, Out> {
   }
 
   // Accumulate sum and count.
-  void accumulate(const Chunk& chunk, unique_ptr<RedObj>& red_obj) override {
+  void accumulate(const Chunk& chunk, const In* data, unique_ptr<RedObj>& red_obj) override {
     if (red_obj == nullptr) {
       red_obj.reset(new WinObj);
     }
 
     WinObj* w = static_cast<WinObj*>(red_obj.get());  
     for (size_t i = 0; i < chunk.length; ++i) {
-      dprintf("Adding the element chunk[%lu] = %.0f.\n", chunk.start + i, this->data_[chunk.start + i]);
-      w->sum += (double)this->data_[chunk.start + i];
+      dprintf("Adding the element chunk[%lu] = %.0f.\n", chunk.start + i, data[chunk.start + i]);
+      w->sum += (double)data[chunk.start + i];
       w->count++;
     }
 

@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstring>
+#include <map>
 #include <memory>
 
 #include "chunk.h"
@@ -116,7 +117,7 @@ class LogisticRegression : public Scheduler<In, double*> {
   // variable, and the total lenght is NUM_COLS = NUM_DIMS + 1.
   // Since there is only one global gradient to maintain, return a unique and fixed
   // integer in this case.
-  int gen_key(const Chunk& chunk) const override {
+  int gen_key(const Chunk& chunk, const In* data, map<int, unique_ptr<RedObj>>& combination_map) const override {
     if (chunk.empty())
       return NAN;
 
@@ -127,7 +128,7 @@ class LogisticRegression : public Scheduler<In, double*> {
   }
 
   // Accumulate gradient. 
-  void accumulate(const Chunk& chunk, unique_ptr<RedObj>& red_obj) override {
+  void accumulate(const Chunk& chunk, const In* data, unique_ptr<RedObj>& red_obj) override {
     if (chunk.empty())
       return;
 
@@ -139,7 +140,7 @@ class LogisticRegression : public Scheduler<In, double*> {
 
     // Compute the (unit) gradient for the given chunk.
     double unit_gradient[NUM_DIMS];
-    compute(&this->data_[chunk.start], g_obj->weight, unit_gradient);
+    compute(&data[chunk.start], g_obj->weight, unit_gradient);
 
     // Accumulte unit gradient to the local total gradient.
     g_obj->update_gradient(unit_gradient);
@@ -167,29 +168,29 @@ class LogisticRegression : public Scheduler<In, double*> {
   }
 
   /* Additional Function Overriding */
-  // Set up the initial weight in combination_map_.
-  void process_extra_data() override {
+  // Set up the initial weight in combination_map.
+  void process_extra_data(const void* extra_data, map<int, unique_ptr<RedObj>>& combination_map) override {
     dprintf("Scheduler: Processing extra data...\n");
 
-    assert(this->extra_data_ != nullptr);
-    const double* weight = (const double*)this->extra_data_;
+    assert(extra_data != nullptr);
+    const double* weight = (const double*)extra_data;
 
     // Initialize the result gradient object with the initial weight.
     unique_ptr<GradientObj> g_obj(new GradientObj);
     memcpy(g_obj->weight, weight, NUM_DIMS * sizeof(double));
 
-    // Update combination_map_.
-    this->combination_map_[UNIQUE_KEY] = move(g_obj);
-    dprintf("combination_map_[%d] = %s\n", UNIQUE_KEY, this->combination_map_[UNIQUE_KEY]->str().c_str());
+    // Update combination_map.
+    combination_map[UNIQUE_KEY] = move(g_obj);
+    dprintf("combination_map[%d] = %s\n", UNIQUE_KEY, combination_map[UNIQUE_KEY]->str().c_str());
   }
 
-  // Finalize combinaion_map_.
-  void post_combine() override {
+  // Finalize combinaion_map.
+  void post_combine(map<int, unique_ptr<RedObj>>& combination_map) override {
     // There should be only one key-value pair is stored in the combination map.
-    assert(this->combination_map_.size() == 1);
+    assert(combination_map.size() == 1);
 
     // Process update and clearance altogether.
-    GradientObj* g_obj = static_cast<GradientObj*>(this->combination_map_.find(UNIQUE_KEY)->second.get());         
+    GradientObj* g_obj = static_cast<GradientObj*>(combination_map.find(UNIQUE_KEY)->second.get());         
     // Update the weight in the gradient object.
     g_obj->update_weight();
     // Clear gradient in the gradient object.

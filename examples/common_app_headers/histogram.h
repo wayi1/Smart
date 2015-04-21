@@ -2,6 +2,7 @@
 #define	_HISTOGRAM_H_
 
 #include <cmath>
+#include <map>
 #include <memory>
 
 #include "chunk.h"
@@ -28,19 +29,19 @@ class Histogram : public Scheduler<In, size_t> {
   using Scheduler<In, size_t>::Scheduler;
 
   // Group elements into buckets.
-  int gen_key(const Chunk& chunk) const override {
-    return (int)(this->data_[chunk.start] - MIN_VAL) / BUCKET_WIDTH;
+  int gen_key(const Chunk& chunk, const In* data, map<int, unique_ptr<RedObj>>& combination_map) const override {
+    return (int)(data[chunk.start] - MIN_VAL) / BUCKET_WIDTH;
   }
 
   // Accumulate sum and count.
-  void accumulate(const Chunk& chunk, unique_ptr<RedObj>& red_obj) override {
+  void accumulate(const Chunk& chunk, const In* data, unique_ptr<RedObj>& red_obj) override {
     if (red_obj == nullptr) {
       red_obj.reset(new Hist);
     }
 
     Hist* h = static_cast<Hist*>(red_obj.get());  
     for (size_t i = 0; i < chunk.length; ++i) {
-      dprintf("Adding the element chunk[%lu] = %.0f.\n", chunk.start + i, this->data_[chunk.start + i]);
+      dprintf("Adding the element chunk[%lu] = %.0f.\n", chunk.start + i, data[chunk.start + i]);
       h->count++;
     }
 
