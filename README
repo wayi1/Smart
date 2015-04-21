@@ -1,10 +1,10 @@
 Description:
 
 Smart (in-Situ MApReduce liTe) is a MapReduce-like framework originally designed for in-situ scientific analytics.
-To maximize the performance in different in-situ scenarios, it can support two different in-situ modes: space sharing and time sharing.
-Space sharing mode aims to minimize the memory consumption of analytics, by avoiding extra data copy of simulation output, i.e., time step. This mode is generally preferred.
-Time sharing mode can support concurrent simulation and analytics on two separate groups of cores of each node.
-This mode can be more useful when simulation task reaches a scalability bottleneck with the given resources.
+To maximize the performance in different in-situ scenarios, it can support two different in-situ modes: time sharing and space sharing.
+Time sharing mode aims to minimize the memory consumption of analytics, by avoiding extra data copy of simulation output, i.e., time step. This mode is generally preferred.
+Space sharing mode can support concurrent simulation and analytics on two separate groups of cores of each node.
+This mode can be more effective when simulation task reaches a scalability bottleneck with the given resources.
 In addition, offline analytics for disk-resident data (in NetCDF/HDF5 format) is also supported.
 All these modes can be switched flexibly with the same analytics code (similar to a MapReduce job).
 
@@ -13,7 +13,7 @@ All these modes can be switched flexibly with the same analytics code (similar t
 Setup Tips:
 1. To compile the source code, C++11 should be supported. The version of GNU compiler should be at least 4.8.
 If the Intel compiler is used, then some minor modification on C++11 syntax may be required (e.g., inheritance of constructor). The version of Intel compiler should be at least 14.0.
-
+mo
 2. Before running any application, the user should check if the OpenMP version is newer than 3.1.
 Setting CPU affinity can easily gain a 10X speedup.
 This can be achieved simply by setting an environment variable in the bashrc/bash_profile file:
@@ -47,7 +47,7 @@ Global combination map is combination_map_ on the master node, and it can be ret
 2) "post-combine": performs post-combination processing if necessary;
 3) "convert": converts a reduction object to an output result if necessary.
 
-5. Run commands in time sharing mode:
+5. Run commands in space sharing mode:
 1) Using mvapich2:
 Unless global combination is not required, make sure that MV2_ENABLE_AFFINITY is set as 0.
 Otherwise, the thread level cannot be controlled.
