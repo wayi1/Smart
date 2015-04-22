@@ -84,7 +84,7 @@ class Kmeans : public Scheduler<T, T*> {
 
   // Each chunk is viewed as a multi-dimensional point.
   // Identify the cluster index given the point and all the current centroids.
-  int gen_key(const Chunk& chunk, const T* data, map<int, unique_ptr<RedObj>>& combination_map) const override {
+  int gen_key(const Chunk& chunk, const T* data, const map<int, unique_ptr<RedObj>>& combination_map) const override {
     if (chunk.empty())
       return NAN;
 

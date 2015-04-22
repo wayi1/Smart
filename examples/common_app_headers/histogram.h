@@ -29,7 +29,7 @@ class Histogram : public Scheduler<In, size_t> {
   using Scheduler<In, size_t>::Scheduler;
 
   // Group elements into buckets.
-  int gen_key(const Chunk& chunk, const In* data, map<int, unique_ptr<RedObj>>& combination_map) const override {
+  int gen_key(const Chunk& chunk, const In* data, const map<int, unique_ptr<RedObj>>& combination_map) const override {
     return (int)(data[chunk.start] - MIN_VAL) / BUCKET_WIDTH;
   }
 

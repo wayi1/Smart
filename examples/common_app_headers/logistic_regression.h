@@ -117,7 +117,7 @@ class LogisticRegression : public Scheduler<In, double*> {
   // variable, and the total lenght is NUM_COLS = NUM_DIMS + 1.
   // Since there is only one global gradient to maintain, return a unique and fixed
   // integer in this case.
-  int gen_key(const Chunk& chunk, const In* data, map<int, unique_ptr<RedObj>>& combination_map) const override {
+  int gen_key(const Chunk& chunk, const In* data, const map<int, unique_ptr<RedObj>>& combination_map) const override {
     if (chunk.empty())
       return NAN;
 

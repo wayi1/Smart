@@ -45,7 +45,7 @@ class MovingMedian : public Scheduler<In, Out> {
 		using Scheduler<In, Out>::Scheduler;
 
 		// Group elements into buckets.
-		void gen_keys(const Chunk& chunk, const In* data, vector<int>& keys, map<int, unique_ptr<RedObj>>& combination_map) const override {
+		void gen_keys(const Chunk& chunk, const In* data, vector<int>& keys, const map<int, unique_ptr<RedObj>>& combination_map) const override {
 			dprintf("For chunk[%lu], genrate key %lu from node%d...\n", chunk.start, chunk.start, this->rank_);
 			keys.emplace_back(chunk.start);
 			// Assume that chunk.start + RADIUS will be within the size_t value

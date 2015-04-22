@@ -165,10 +165,10 @@ class Scheduler {
    */
   // A derivation on either gen_key or gen_keys is required.
   // Generate an (integer) key given a chunk.
-  virtual int gen_key(const Chunk& chunk, const In* data, map<int, unique_ptr<RedObj>>& combination_map) const {return -1;}
+  virtual int gen_key(const Chunk& chunk, const In* data, const map<int, unique_ptr<RedObj>>& combination_map) const {return -1;}
 
   // Generate (integer) keys given a chunk.
-  virtual void gen_keys(const Chunk& chunk, const In* data, vector<int>& keys, map<int, unique_ptr<RedObj>>& combination_map) const {}
+  virtual void gen_keys(const Chunk& chunk, const In* data, vector<int>& keys, const map<int, unique_ptr<RedObj>>& combination_map) const {}
 
   // Accumulate the chunk on a reduction object.
   virtual void accumulate(const Chunk& chunk, const In* data, unique_ptr<RedObj>& red_obj) = 0;
