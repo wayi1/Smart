@@ -72,7 +72,7 @@ class Scheduler {
    */
   explicit Scheduler(const SchedArgs& args);
 
-  /* Run Functions for Space Sharing Mode */
+  /* Run Functions for Time Sharing Mode */
   // Run the data processing by specifying both buffer size and mapping mode.
   // The input array's total length is the length of the data shared buffer used
   // for in-situ processing.
@@ -80,45 +80,45 @@ class Scheduler {
   // processing only a single input data chunk.
   // The mode specifies the mapping mode, i.e., generating a single key or
   // multiple keys per data chunk. 
-  void run_space_sharing(const In* data, size_t total_len, size_t buf_size, Out* out, size_t out_len, MAPPING_MODE_T mode);
+  void run_time_sharing(const In* data, size_t total_len, size_t buf_size, Out* out, size_t out_len, MAPPING_MODE_T mode);
 
   // Run the data processing by generating a single key per data chunk.
   // buf_size_ equals the input array's total length by default.
   // This run function is preferred when no read buffer size is specified. 
   void run(const In* data, size_t total_len, Out* out, size_t out_len) {
-    run_space_sharing(data, total_len, total_len, out, out_len, GEN_ONE_KEY_PER_CHUNK);
+    run_time_sharing(data, total_len, total_len, out, out_len, GEN_ONE_KEY_PER_CHUNK);
   }
 
   // Run the data processing by generating multiple keys per data chunk.
   // buf_size_ equals the input array's total length by default.
   // This run function is preferred when no read buffer size is specified. 
   void run2(const In* data, size_t total_len, Out* out, size_t out_len) {
-    run_space_sharing(data, total_len, total_len, out, out_len, GEN_KEYS_PER_CHUNK);
+    run_time_sharing(data, total_len, total_len, out, out_len, GEN_KEYS_PER_CHUNK);
   }
 
-  /* Run Functions for Time Sharing Mode */
+  /* Run Functions for Space Sharing Mode */
   // Run the data processing by specifying mapping mode.
   // The input array MUST be fed to circular_buf_ by a simulation process in advance.
   // buf_size_ equals the input array's total length by default.
   // The mode specifies the mapping mode, i.e., generating a single key or
   // multiple keys per data chunk. 
-  void run_time_sharing(Out* out, size_t out_len, MAPPING_MODE_T mapping_mode);
+  void run_space_sharing(Out* out, size_t out_len, MAPPING_MODE_T mapping_mode);
 
   // Run the data processing by generating a single key per data chunk.
   // buf_size_ equals the input array's total length by default.
   void run(Out* out, size_t out_len) {
-    run_time_sharing(out, out_len, GEN_ONE_KEY_PER_CHUNK);   
+    run_space_sharing(out, out_len, GEN_ONE_KEY_PER_CHUNK);   
   }
 
   // Run the data processing by generating multiple keys per data chunk.
   // buf_size_ equals the input array's total length by default.
   void run2(Out* out, size_t out_len) {
-    run_time_sharing(out, out_len, GEN_KEYS_PER_CHUNK);
+    run_space_sharing(out, out_len, GEN_KEYS_PER_CHUNK);
   }
 
   // Feed a time step to circular_buf_.
   // This function MUST be called by a single thread. 
-  // This function is used in time sharing mode only.
+  // This function is used in space sharing mode only.
   void feed(const In* data, size_t total_len);
 
   /* Getters */
@@ -304,7 +304,7 @@ Scheduler<In, Out>::Scheduler(const SchedArgs& args) : num_threads_(args.num_thr
   if (rank_ == 0)
     printf("Scheduler: Reduciton map for %lu threads is ready.\n", reduction_map_.size()); 
 
-  // Extra initialization for time sharing mode.
+  // Extra initialization for space sharing mode.
   memset(cell_flags_, 0, CIRCULAR_BUF_SIZE_ * sizeof(bool));  // Each unset flag indicates an empty cell.
   memset(circular_buf_, 0, CIRCULAR_BUF_SIZE_ * sizeof(In*));  // No cell has been allocated in the buffer.
 }
@@ -325,7 +325,7 @@ void Scheduler<In, Out>::setup(const In* data, size_t total_len, size_t buf_size
 }
 
 template <class In, class Out>
-void Scheduler<In, Out>::run_space_sharing(const In* data, size_t total_len, size_t buf_size, Out* out, size_t out_len, MAPPING_MODE_T mode) {
+void Scheduler<In, Out>::run_time_sharing(const In* data, size_t total_len, size_t buf_size, Out* out, size_t out_len, MAPPING_MODE_T mode) {
   //chrono::time_point<chrono::system_clock> clk_beg, clk_end;
   //clk_beg = chrono::system_clock::now();
 
@@ -430,7 +430,7 @@ void Scheduler<In, Out>::run_space_sharing(const In* data, size_t total_len, siz
 }
 
 template <class In, class Out>
-void Scheduler<In, Out>::run_time_sharing(Out* out, size_t out_len, MAPPING_MODE_T mapping_mode) {
+void Scheduler<In, Out>::run_space_sharing(Out* out, size_t out_len, MAPPING_MODE_T mapping_mode) {
   // Wait for a produced cell.
   while(!cell_flags_[c_idx_]) {
     dprintf("Scheduler: Waiting for producing time steps...\n");
