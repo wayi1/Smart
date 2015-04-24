@@ -260,7 +260,7 @@ class Scheduler {
   const In* data_ = nullptr;
   size_t total_len_ = 0;
   Chunk input_; // Input layout on the data source provided by data_.
-  size_t buf_size_ = 0;  // Input data buffer, which will be greater or equal to the length of input_ (not full or full).
+  size_t buf_size_ = 0;  // Input data buffer, which will be greater than or equal to the length of input_ (i.e., not full or full).
 
   /* Output Array Data */
   Out* out_ = nullptr;
